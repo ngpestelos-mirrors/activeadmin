@@ -87,8 +87,10 @@ in `docs/v3/`. The site includes `UPGRADING.md` directly as its v4 upgrade guide
 
 Run `npm run docs:test` to build the site and check version links and legacy
 redirects. The deployment artifact is `docs/.vitepress/dist`: it contains the
-site in `docs/` and generated HTML redirects for the former root URLs. Publish
-this entire directory so links such as `/3-index-pages.html` keep working.
+site in `docs/` and generated HTML redirects for the former root URLs. These
+redirects target the matching pages under `/docs/v3/` and are generated from
+the v3 archive, including pages removed from v4. Publish this entire directory
+so links such as `/3-index-pages.html` keep working.
 
 ### Create a Pull Request
 

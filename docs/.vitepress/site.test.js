@@ -1,17 +1,22 @@
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { mkdtemp, readFile, rm } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
 import { URL, fileURLToPath } from 'node:url'
 import { runInNewContext } from 'node:vm'
+import { generateLegacyRedirects } from './redirects.js'
 
 const dist = fileURLToPath(new URL('./dist/', import.meta.url))
 const read = (path) => readFileSync(join(dist, path), 'utf8')
 
-test('legacy root URLs redirect to real docs pages and preserve queries and anchors', () => {
-  for (const path of ['index', '3-index-pages', '3-index-pages/index-as-table', '3-index-pages/index-as-grid', 'documentation']) {
+test('every archived v3 page has a legacy redirect that preserves queries and anchors', () => {
+  const pages = readdirSync(join(dist, 'docs/v3'), { recursive: true }).filter((path) => path.endsWith('.html'))
+  for (const file of pages) {
+    const path = file.replace(/\.html$/, '')
     const html = read(`${path}.html`)
-    const destination = path === 'index' ? '/docs/' : `/docs/${path}.html`
+    const destination = path === 'index' ? '/docs/v3/' : `/docs/v3/${path}.html`
     assert.ok(html.includes(`<meta http-equiv="refresh" content="0; url=${destination}">`))
     assert.ok(html.includes(`<a href="${destination}">`))
     assert.ok(html.includes(`href="https://activeadmin.info${destination}"`))
@@ -26,6 +31,23 @@ test('legacy root URLs redirect to real docs pages and preserve queries and anch
       } },
     })
     assert.equal(redirected, `${destination}?from=old-link#index-filters`)
+  }
+})
+
+test('legacy redirects exist for archived pages even when v4 has no corresponding page', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'activeadmin-redirects-'))
+  try {
+    const page = 'v3/3-index-pages/index-as-grid.md'
+    await generateLegacyRedirects({
+      outDir,
+      pages: ['index.md', page],
+      rewrites: { map: { 'index.md': 'docs/index.md', [page]: `docs/${page}` } },
+    })
+    const html = await readFile(join(outDir, '3-index-pages/index-as-grid.html'), 'utf8')
+    assert.ok(html.includes('content="0; url=/docs/v3/3-index-pages/index-as-grid.html"'))
+    assert.ok(!existsSync(join(outDir, 'index.html')), 'A v4-only page must not create a legacy redirect')
+  } finally {
+    await rm(outDir, { recursive: true, force: true })
   }
 })
 

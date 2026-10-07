@@ -2,14 +2,15 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 
 // GitHub Pages needs real HTML files for the former root-level URLs.
+// Generate old root URLs from the v3 archive, including pages removed from v4.
 export async function generateLegacyRedirects({ outDir, pages, rewrites }) {
   for (const page of pages) {
-    if (page.startsWith('v3/')) continue
+    if (!page.startsWith('v3/')) continue
 
     const target = '/' + rewrites.map[page]
       .replace(/(^|\/)index\.md$/, '$1')
       .replace(/\.md$/, '.html')
-    const output = join(outDir, page.replace(/\.md$/, '.html'))
+    const output = join(outDir, page.slice('v3/'.length).replace(/\.md$/, '.html'))
     await mkdir(dirname(output), { recursive: true })
     await writeFile(output, `<!doctype html>
 <html lang="en">
