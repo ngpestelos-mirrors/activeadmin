@@ -3,6 +3,11 @@ name: Markdown Lint
 on:
   pull_request:
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: read
+
 env:
   MARKDOWNLINT_FLAGS: ${{ vars.REVIEWDOG_MARKDOWNLINT_FLAGS || '--git-recurse .' }}
 
@@ -12,7 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ vars.SKIP_REVIEWDOG_MARKDOWNLINT != 'true' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
       - uses: tj-actions/changed-files@v47.0.6
         id: changed-files
         with:
@@ -20,7 +27,7 @@ jobs:
             **.md
             .markdownlint.yml
             .github/workflows/markdown-lint.yml
-      - uses: reviewdog/action-markdownlint@v0
+      - uses: reviewdog/action-markdownlint@v0.31.4
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
