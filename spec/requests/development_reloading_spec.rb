@@ -30,7 +30,7 @@ RSpec.describe "Development reloading" do
     end
   end
 
-  it "picks up new admin files and model changes without a restart" do
+  it "picks up new admin files and model changes without a restart, while signed in" do
     script = File.expand_path("../support/reloading_app_script.rb", __dir__)
     repo_root = File.expand_path("../..", __dir__)
 
@@ -44,12 +44,15 @@ RSpec.describe "Development reloading" do
     results = JSON.parse(stdout[/^RESULTS=(.*)$/, 1])
 
     expect(results).to include(
+      "signed_in_before_registering" => true,
       "menu_before_registering" => false,
+      "signed_in_after_registering" => true,
       "menu_after_registering" => true,
-      "create_status" => 303,
       "created_flash" => true,
       "invalid_status" => 422,
-      "validation_error" => true
+      "validation_error" => true,
+      "created_after_invalid" => false,
+      "post_count" => 1
     )
   end
 end
