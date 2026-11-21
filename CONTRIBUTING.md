@@ -21,7 +21,7 @@ a branch with a descriptive name.
 
 ### Get the test suite running
 
-Make sure you're using a recent Ruby and Node version. You'll also need Chrome installed in order to run Cucumber scenarios.
+Make sure you're using a recent Ruby and Node version. You'll also need Chrome installed to run browser system specs.
 
 Now install the development dependencies:
 
