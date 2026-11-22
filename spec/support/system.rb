@@ -2,10 +2,6 @@
 require "capybara/rspec"
 require "capybara/cuprite"
 
-Capybara.register_driver(:cuprite) do |app|
-  Capybara::Cuprite::Driver.new(app, process_timeout: 30, timeout: 30)
-end
-
 Capybara.server = :webrick
 
 RSpec.configure do |config|

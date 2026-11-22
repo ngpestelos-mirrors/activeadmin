@@ -62,6 +62,7 @@ jobs:
       - name: Run RSpec tests
         env:
           COVERAGE: true
+          FERRUM_PROCESS_TIMEOUT: 30
         run: bin/parallel_rspec
       - name: Rename coverage file by matrix run
         run: mv coverage/coverage.xml coverage/coverage-ruby-${{ matrix.ruby }}-${{ matrix.rails }}.xml
